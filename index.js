@@ -30,7 +30,7 @@ const punishmentRole = '914077123910705173';
 
 const giveOldRole = true;
 
-// const commands = {}
+const commands = {}
 // const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
 // for (const file of commandFiles) {
 //     const command = require(`./commands/${file}`);
