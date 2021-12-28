@@ -30,12 +30,12 @@ const punishmentRole = '914077123910705173';
 
 const giveOldRole = true;
 
-const commands = {}
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
-for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    commands[command.data.name] = command;
-}
+// const commands = {}
+// const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'))
+// for (const file of commandFiles) {
+//     const command = require(`./commands/${file}`);
+//     commands[command.data.name] = command;
+// }
 
 client.on('ready', async () => {
     const data = []
