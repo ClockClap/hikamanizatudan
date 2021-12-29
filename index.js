@@ -48,19 +48,20 @@ client.on('ready', async () => {
     })
     console.log(`Logged in as ${client.user.tag}`);
     client.user.setStatus('dnd');
-    client.user.setActivity("Let's ルール 読みましょう！", {type: 'WATCHING'});
+    client.user.setActivity("Let's ルール 守りましょう！", {type: 'WATCHING'});
 });
 
 let messages = {};
 
 client.on('messageCreate', async message => {
+    if (!message) return;
+    if (!message.author) return;
     if (message.author.bot) return;
     if (message.channel.type === 'DM') {
-        await message.author.send({ content: '何かありましたか？\n' +
-                'このボットに対してのDMは意味がありません。\n' +
-                'もし、何かサーバーのシステムについてｱｼﾞｬｽﾄﾞｩｰｲな点がありましたら、当サーバーのお問い合わせフォームまでクレームください。\n\n' +
+        await message.author.send({ content: '要件がある場合は、ヒカマニ雑談サーバーのお問い合わせフォームまでクレームください。\n' +
+                'このボットに対してのDMは意味がありません。\n\n' +
                 '**☆ヒカマニ雑談サーバー☆**\n' +
-                'https://discord.gg/qeEhjYVfqb'});
+                'https://discord.gg/qeEhjYVfqb'}).catch(console.error);
         await client.channels.cache.get(dmLogChannel).send({ content: ' ', embeds: [{
                 author: {
                     icon_url: `${message.author.avatarURL()}`,
@@ -78,23 +79,39 @@ client.on('messageCreate', async message => {
                     await kickLog(message.author, '認証チャンネル上での宣伝及びメンション');
                     await message.member.kick();
                 }
-            } else if(!message.member.roles.cache.some(role => role.id === verifiedRole)) {
-                await message.delete();
-                await message.member.roles.add(await message.guild.roles.fetch(verifiedRole));
-                if(giveOldRole) await message.member.roles.add(await message.guild.roles.fetch(oldRole));
-                await message.author.send({ content: ' ', embeds: [{
-                        title: '認証しました。',
-                        description: 'ヒカマニ雑談サーバーの全要素が使用可能になりました。',
-                        color: 0x33DD33
-                    }] });
-                await client.channels.cache.get(logChannel).send({ content: ' ', embeds: [{
-                        author: {
-                            icon_url: `${message.author.avatarURL()}`,
-                            name: `${message.author.tag}`
-                        },
-                        title: '認証に成功しました。',
-                        color: 0x33DD33
-                    }] });
+            } else {
+                if (message.member.roles.cache.some(role => role.id === verifiedRole)) {
+                    await message.delete();
+                    await message.author.send({
+                        content: ' ', embeds: [{
+                            title: '既に認証済みです。',
+                            description: '認証されているか不安ですか？自分のロールを見てみてください。\nほら、`@認証済み` でしょ？',
+                            color: 0xDD3333
+                        }]
+                    }).catch(console.error);
+                } else {
+                    await message.delete();
+                    await message.member.roles.add(await message.guild.roles.fetch(verifiedRole));
+                    if (giveOldRole && !message.member.roles.cache.some(role => role.id === oldRole))
+                        await message.member.roles.add(await message.guild.roles.fetch(oldRole));
+                    await message.author.send({
+                        content: ' ', embeds: [{
+                            title: '認証しました。',
+                            description: 'ヒカマニ雑談サーバーの全要素が使用可能になりました。',
+                            color: 0x33DD33
+                        }]
+                    }).catch(console.error);
+                    await client.channels.cache.get(logChannel).send({
+                        content: ' ', embeds: [{
+                            author: {
+                                icon_url: `${message.author.avatarURL()}`,
+                                name: `${message.author.tag}`
+                            },
+                            title: '認証に成功しました。',
+                            color: 0x33DD33
+                        }]
+                    });
+                }
             }
         } else {
             if (message.channel.id !== ignoreChannel
@@ -107,7 +124,7 @@ client.on('messageCreate', async message => {
                 let deleted = false;
                 if (previousMsg) {
                     const millis = d.getMilliseconds() - previousMsg.date.getMilliseconds();
-                    if (millis <= 10000 &&
+                    if (millis <= 8000 &&
                         (message.content.includes('@everyone') || message.content.includes('@here')) &&
                         (previousMsg.content.includes('@everyone') || previousMsg.content.includes('@here'))) {
                         deleted = true;
@@ -160,7 +177,7 @@ async function warn(member, info) {
             description: info,
             color: 0xDD3333
         }]
-    });
+    }).catch(console.error);
     await client.channels.cache.get(warnLogChannel).send({
         content: ' ', embeds: [{
             author: {
